@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, inspect
 from sqlalchemy.ext.automap import automap_base
 import os
 import pandas as pd
@@ -15,17 +15,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-metadata = MetaData(bind=db.engine)
-metadata.reflect(db.engine)
-Base = automap_base(metadata=metadata)
+Base = automap_base()
 
-Base.prepare()
+Base.prepare(db.engine, reflect=True)
 
 Samples = Base.classes.samples
 Metadata = Base.classes.sample_metadata
 
+inst = inspect(Samples)
+attr_names = [c_attr.key for c_attr in inst.mapper.column_attrs]
+print(Samples.__table__.c['940'])
 
-# print(Samples.columns)
 
 @app.route('/')
 def index():
@@ -34,18 +34,14 @@ def index():
 
 @app.route('/samples/<sample>')
 def get_sample(sample):
-    statement = db.session.query(Samples).statement
-    df = pd.read_sql_query(statement, db.session.bind)
+    sample_col = Samples.__table__.c[sample]
+    results = db.session.query(Samples.otu_id, Samples.otu_label,
+                               sample_col).filter(
+        sample_col > 1).order_by(
+        sample_col.desc()).limit(10).all()
 
-    sample_data = df.loc[df[sample] > 0].sort_values(sample,
-                                                     ascending=False).head(10)
 
-    results = {
-        'otu_id': sample_data['otu_id'].values.tolist(),
-        'otu_label': sample_data['otu_label'].values.tolist(),
-        'values': sample_data[sample].values.tolist()
-    }
-
+    print(results)
     return jsonify(results)
 
 
