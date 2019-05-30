@@ -22,29 +22,49 @@ function createPie(data) {
 }
 
 function createBubble(data) {
-    var desired_maximum_marker_size = 10;
-    var size = data['otu_values']
+    var desired_maximum_marker_size = 15;
+    var size = data['otu_values'];
     var bubbleData = [{
         x: data['otu_ids'],
         y: data['otu_values'],
-        text: data['otu_lables'],
+        text: data['otu_labels'],
         mode: 'markers',
         marker: {
             size: size,
-            color: data['otu_ids'].map(d => 'hsl(' + d + ', 100, 40)'),
+            color: data['otu_ids'].map(d => 'hsl(' + (d % 360) + ', 100, 40)'),
             sizeref: 2.0 * Math.max(...size) / (desired_maximum_marker_size ** 2)
         }
     }];
+    console.log("Here");
+    console.log(bubbleData[0]['marker']['color']);
 
     // TODO - ADD LAYOUT
+    var layout = {
+        title: 'Belly Button Bacteria',
+        margin: {
+            r: 20
+        },
+        width: 800,
+        automargin: true,
+        xaxis: {
+            title: 'Bacteria ID'
+        },
+        yaxis: {
+            title: 'Amount of Bacteria'
+        }
+    };
 
-    Plotly.newPlot('bubble', bubbleData, {responsive: true});
+    Plotly.newPlot('bubble', bubbleData, layout, {responsive: true});
 
 }
 
 function createGauge(data) {
     // Enter a speed between 0 and 180
-    var level = 175;
+    console.log(data);
+    var normalized_num = Math.floor(data['wfreq']/2) * 2;
+    console.log(normalized_num);
+    var level = 18 + 18 * (normalized_num);
+    console.log("level: " + level);
 
 // Trig to calc meter point
     var degrees = 180 - level,
@@ -60,8 +80,9 @@ function createGauge(data) {
         pathY = String(y),
         pathEnd = ' Z';
     var path = mainPath.concat(pathX, space, pathY, pathEnd);
+    console.log(path);
 
-    var data = [{
+    var gaugeData = [{
         type: 'scatter',
         x: [0], y: [0],
         marker: {size: 28, color: '850000'},
@@ -71,16 +92,16 @@ function createGauge(data) {
         hoverinfo: 'text+name'
     },
         {
-            values: [50 / 6, 50 / 6, 50 / 6, 50 / 6, 50 / 6, 50 / 6, 50],
+            values: [60 / 5, 60 / 5, 60 / 5, 60 / 5, 60 / 5, 60],
             rotation: 90,
-            text: ['TOO FAST!', 'Pretty Fast', 'Fast', 'Average',
-                'Slow', 'Super Slow', ''],
+            text: ['8-9', '6-7', '4-5', '2-3',
+                '0-1', ''],
             textinfo: 'text',
             textposition: 'inside',
             marker: {
                 colors: ['rgba(14, 127, 0, .5)', 'rgba(110, 154, 22, .5)',
                     'rgba(170, 202, 42, .5)', 'rgba(202, 209, 95, .5)',
-                    'rgba(210, 206, 145, .5)', 'rgba(232, 226, 202, .5)',
+                    'rgba(210, 206, 145, .5)',
                     'rgba(255, 255, 255, 0)']
             },
             labels: ['151-180', '121-150', '91-120', '61-90', '31-60', '0-30', ''],
@@ -99,9 +120,8 @@ function createGauge(data) {
                 color: '850000'
             }
         }],
-        title: '<b>Gauge</b> <br> Speed 0-100',
-        height: 1000,
-        width: 1000,
+        title: '<b>Belly Button Washing Frequency</b><br> Per Week',
+
         xaxis: {
             zeroline: false, showticklabels: false,
             showgrid: false, range: [-1, 1]
@@ -112,7 +132,7 @@ function createGauge(data) {
         }
     };
 
-    Plotly.newPlot('myDiv', data, layout);
+    Plotly.newPlot('gauge', gaugeData, layout, {responsive: true});
 }
 
 
@@ -123,6 +143,7 @@ function updateCharts(sample) {
         // update meta list
         updateMeta(data);
         // TODO - update the gauge
+        createGauge(data[0]);
     });
 
 
