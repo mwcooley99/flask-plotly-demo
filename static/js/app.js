@@ -3,18 +3,14 @@ var sampleSelect = d3.select('#sample-select');
 
 // var metaFields =
 
-function updateMeta(sample) {
-    console.log(sample);
-    d3.json('/metadata/' + sample, (data) => {
-        console.log(data);
-        var fields = Object.keys(data[0]);
-        var listItems = d3.select('#sample-meta').selectAll('li')
-            .data(fields);
+function updateMeta(data) {
+    var fields = Object.keys(data[0]);
+    var listItems = d3.select('#sample-meta').selectAll('li')
+        .data(fields);
 
-        listItems.exit().remove();
-        listItems.enter().append('li').merge(listItems)
-            .text(d => d.toUpperCase() + ': ' + data[0][d])
-    });
+    listItems.exit().remove();
+    listItems.enter().append('li').merge(listItems)
+        .text(d => d.toUpperCase() + ': ' + data[0][d])
 
 }
 
@@ -29,15 +25,20 @@ function createPie(data) {
 }
 
 
-
 function updateCharts(sample) {
-    d3.json('/samples/' + sample, (data) => {
-        // Create the pie chart
-        console.log(data);
+    // PULL METADATA
+    // update meta list
+    d3.json('/metadata/' + sample, data => {
+        updateMeta(data);
+    });
+    // TODO - update the gauge
+
+    // PULL SAMPLE DATA
+    // update the pie chart
+    d3.json('/samples/' + sample, data => {
         createPie(data);
     });
-
-    createGauge(sample)
+    // update the bubble chart
 }
 
 function init() {
@@ -51,13 +52,9 @@ function init() {
 
         var sample = d3.select('#sample-select').property('value');
 
-
-        updateMeta(sample);
-        updateCharts(sample)
+        updateCharts(sample);
 
     });
-
-
 }
 
 init();
@@ -65,7 +62,7 @@ init();
 d3.select("#sample-select").on('change', function () {
     var sample = d3.select('#sample-select').property('value');
 
-    updateMeta(sample);
+    updateCharts(sample);
 });
 
 
