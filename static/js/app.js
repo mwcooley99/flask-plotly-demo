@@ -38,7 +38,6 @@ function createBubble(data) {
     console.log("Here");
     console.log(bubbleData[0]['marker']['color']);
 
-    // TODO - ADD LAYOUT
     var layout = {
         title: 'Belly Button Bacteria',
         margin: {
@@ -142,19 +141,16 @@ function updateCharts(sample) {
     d3.json('/metadata/' + sample, data => {
         // update meta list
         updateMeta(data);
-        // TODO - update the gauge
         createGauge(data[0]);
     });
 
 
     // PULL SAMPLE DATA
-
     d3.json('/samples/' + sample, data => {
         // update the pie chart
         createPie(data);
-        // TODO - update the bubble chart
+        //update the bubble chart
         createBubble(data);
-
     });
 
 
