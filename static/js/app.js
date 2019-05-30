@@ -18,7 +18,27 @@ function updateMeta(sample) {
 
 }
 
+function createPie(data) {
+    var pieData = [{
+        values: data['otu_values'],
+        labels: data['otu_ids'],
+        type: 'pie'
+    }];
 
+    Plotly.newPlot('pie', pieData, {responsive: true});
+}
+
+
+
+function updateCharts(sample) {
+    d3.json('/samples/' + sample, (data) => {
+        // Create the pie chart
+        console.log(data);
+        createPie(data);
+    });
+
+    createGauge(sample)
+}
 
 function init() {
     d3.json('/names', function (data) {
@@ -31,7 +51,9 @@ function init() {
 
         var sample = d3.select('#sample-select').property('value');
 
+
         updateMeta(sample);
+        updateCharts(sample)
 
     });
 
