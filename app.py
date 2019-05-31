@@ -1,11 +1,11 @@
-from flask import Flask, render_template, url_for, jsonify
+from flask import Flask, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 
-from sqlalchemy import MetaData, inspect
+from sqlalchemy import inspect
 from sqlalchemy.ext.automap import automap_base
 import os
-import pandas as pd
+
 
 curr_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -26,7 +26,6 @@ Metadata = Base.classes.sample_metadata
 
 inst = inspect(Samples)
 attr_names = [c_attr.key for c_attr in inst.mapper.column_attrs]
-print(Samples.__table__.c['940'])
 
 
 @app.route('/')
@@ -38,7 +37,7 @@ def index():
 def get_sample(sample):
     sample_col = Samples.__table__.c[sample]
     query = db.session.query(Samples.otu_id, Samples.otu_label,
-                               sample_col).filter(
+                             sample_col).filter(
         sample_col > 1).order_by(
         sample_col.desc()).limit(10).all()
 
@@ -52,11 +51,13 @@ def get_sample(sample):
 
     return jsonify(results)
 
+
 @app.route('/names')
 def names():
     query = db.session.query(Metadata.sample).order_by(Metadata.sample).all()
     results = [q[0] for q in query]
     return jsonify(results)
+
 
 @app.route('/metadata/<sample>')
 def get_metadata(sample):
@@ -72,7 +73,8 @@ def get_metadata(sample):
     query = db.session.query(*sel).filter(Metadata.sample == sample)
 
     # convert to list of dictionaries
-    keys = ['sample', 'ethnicity', 'gender', 'age', 'wfreq', 'location', 'bbtype']
+    keys = ['sample', 'ethnicity', 'gender', 'age', 'wfreq', 'location',
+            'bbtype']
     results = [dict(zip(keys, values)) for values in query]
 
     return jsonify(results)
