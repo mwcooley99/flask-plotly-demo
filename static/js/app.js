@@ -15,7 +15,14 @@ function createPie(data) {
     var pieData = [{
         values: data['otu_values'],
         labels: data['otu_ids'],
-        type: 'pie'
+        type: 'pie',
+        text: data['otu_labels'],
+        textfont: {
+            family: 'sans serif',
+            size: 18,
+            color: 'rgba(0,0,0,0)'
+        },
+        hoverinfo: 'label+text+percent'
     }];
 
     Plotly.newPlot('pie', pieData, {responsive: true});
@@ -60,7 +67,7 @@ function createBubble(data) {
 function createGauge(data) {
     // Enter a speed between 0 and 180
     console.log(data);
-    var normalized_num = Math.floor(data['wfreq']/2) * 2;
+    var normalized_num = Math.floor(data['wfreq'] / 2) * 2;
     console.log(normalized_num);
     var level = 18 + 18 * (normalized_num);
     console.log("level: " + level);
